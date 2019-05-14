@@ -21,15 +21,36 @@ void FileSystem::debug(Disk *disk) {
     printf("    %u inode blocks\n"   , block.Super.InodeBlocks);
     printf("    %u inodes\n"         , block.Super.Inodes);
 
+    Block BlockInode;
+    disk->read(1,BlockInode.Data);
+    /*
+    for(int i=0;i<FileSystem::INODES_PER_BLOCK;i++){
+        printf("\tsize: %u\n",BlockInode.Inodes[i].Data);
+    */
+
     // Read Inode blocks
+    for(unsigned int i=0;i<block.Super.InodeBlocks;i++){
+        printf("Inode %d\n",i+1);
+        printf("\tsize: %u\n",block.Inodes[i].Size);
+        printf("\tdirect blocks: %u\n",FileSystem::POINTERS_PER_INODE);
+    }
 }
 
 // Format file system ----------------------------------------------------------
 
 bool FileSystem::format(Disk *disk) {
+    // Checking mounted
+    if(disk->mounted()){
+        printf("Cannot format a mounted device\n");
+        return false;
+    }
+    Block newBlock;
     // Write superblock
-
+    disk->write(0,newBlock.Data);
+    //Disk *newDisk=NULL;
+    
     // Clear all other blocks
+    //disk=newDisk;  ??
     return true;
 }
 
@@ -37,13 +58,13 @@ bool FileSystem::format(Disk *disk) {
 
 bool FileSystem::mount(Disk *disk) {
     // Read superblock
-
+    Block super;
+    disk->read(0,super.Data);
     // Set device and mount
-
+    disk->mount();
     // Copy metadata
-
+    disk->write(0,super.Data);
     // Allocate free block bitmap
-
     return true;
 }
 
